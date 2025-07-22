@@ -1,20 +1,19 @@
-import React from 'react';
+import React from "react";
 
-const fieldTypes = ['Text', 'Email', 'Textarea', 'Checkbox', 'Select', 'Radio', 'Date', 'File'];
-
+import { fieldTypes } from "../../pages/constants";
 const FieldPalette: React.FC = () => {
   return (
-    <div className="card p-3 mb-4">
-      <h5 className="mb-3">🧩 Field Palette</h5>
-      <div className="d-flex flex-wrap gap-2">
-        {fieldTypes.map((type) => (
+    <div className="card p-3 mb-3">
+      <h5>🧩 Field Palette</h5>
+      <div className="d-grid gap-2">
+        {fieldTypes.map((f) => (
           <button
-            key={type}
-            draggable
+            key={f.type}
             className="btn btn-outline-primary"
-            onDragStart={(e) => e.dataTransfer.setData('fieldType', type.toLowerCase())}
+            draggable
+            onDragStart={(e) => e.dataTransfer.setData("fieldType", f.type)}
           >
-            {type}
+            {f.label}
           </button>
         ))}
       </div>

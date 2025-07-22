@@ -1,29 +1,69 @@
-// import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-// import { initializeApp } from 'firebase/app';
+import type { FormSchema } from "../types/form-schema.type";
 
-// const firebaseConfig = {
-//   apiKey: 'YOUR_KEY',
-//   authDomain: 'YOUR_PROJECT.firebaseapp.com',
-//   projectId: 'YOUR_PROJECT_ID',
+// export const fetchFormSchema = async (formName: string, email: string) => {
+//   const res = await axios.post("/api/form/load", { formName, email });
+//   return res.data as {
+//     schema: FormSchema;
+//     savedData: Record<string, any>;
+//     lastStep: number;
+//   };
 // };
 
-// const app = initializeApp(firebaseConfig);
-// const db = getFirestore(app);
+export const fetchFormSchema = async (formName: string, email: string) => {
+  const res = await fetch(`/form-schemas/accountCreation.json`);
 
-export async function getFormSchema(formName: string) {
-//   const ref = doc(db, 'forms', formName);
-//   const snap = await getDoc(ref);
-//   if (snap.exists()) return snap.data().schema;
-//   throw new Error('Schema not found');
-console.log(`Fetching schema for form: ${formName}`);
-}
+  if (!res.ok) {
+    throw new Error(`Failed to load ${formName}.json from /public/forms`);
+  }
 
-export async function saveFormSchema(formName: string, schema: any) {
-//   const ref = doc(db, 'forms', formName);
-//   await setDoc(ref, {
-//     schema,
-//     updatedAt: new Date(),
-//     createdBy: 'admin@example.com',
+  const schema = await res.json();
+
+  return {
+    schema,
+    savedData: {},
+    lastStep: 0,
+  };
+};
+
+// export async function saveFormSchema(
+//   formId: string,
+//   formName: string,
+//   schema: FormSchema
+// ) {
+//   const response = await fetch("https://your-api-endpoint.com/forms", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       formId,
+//       formName,
+//       schema,
+//     }),
 //   });
-console.log(`Saving schema for form: ${formName}`, schema);
+
+//   if (!response.ok) {
+//     throw new Error(`Failed to save schema: ${response.statusText}`);
+//   }
+
+//   return await response.json();
+// }
+
+export async function saveFormSchema(
+  formId: string,
+  formName: string,
+  schema: FormSchema
+) {
+  const blob = new Blob([JSON.stringify(schema, null, 2)], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${formName}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url); // Cleanup
 }

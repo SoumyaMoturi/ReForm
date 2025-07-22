@@ -1,5 +1,5 @@
-
 import FormBuilder from "../pages/FormBuilder/FormBuilder";
+import FormRenderer from "../pages/FormRenderer/FormRenderer";
 export interface AppRoute {
   path: string;
   element: React.ReactNode;
@@ -8,6 +8,6 @@ export interface AppRoute {
 }
 
 export const routesConfig: AppRoute[] = [
-  { path: '/', element: <FormBuilder />, label: 'Home' },
-
+  { path: "/form-builder", element: <FormBuilder />, label: "builder" },
+  { path: "/form-renderer", element: <FormRenderer />, label: "renderer" },
 ];
