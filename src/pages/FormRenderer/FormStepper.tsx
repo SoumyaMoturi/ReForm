@@ -62,9 +62,6 @@ const FormStepper: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Step Title */}
-      {/* <h4 className="mb-3 fw-semibold text-primary">{step.title}</h4> */}
-
       {/* Dynamic Fields */}
       {step.fields.map((field) => (
         <ConditionalField

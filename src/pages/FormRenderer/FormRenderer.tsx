@@ -9,7 +9,7 @@ import { fetchFormSchema } from "../../services/form-schema.service";
 const FormRenderer: React.FC = () => {
   const [email, setEmail] = useState("");
   const [params] = useSearchParams();
-  const formName = params.get("formName") || "";
+  const formName = params.get("formName") || "accountCreation";
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});

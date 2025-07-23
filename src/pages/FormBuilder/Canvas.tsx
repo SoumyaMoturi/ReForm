@@ -12,7 +12,7 @@ const Canvas: React.FC<Props> = ({ fields, setFields, onSelectField }) => {
     e.preventDefault();
     const type = e.dataTransfer.getData("fieldType") as FormFieldType["type"];
     const id = "fld_" + Math.random().toString(36).substr(2, 4); // unique ID generation
-    const newField: FormField = {
+    const newField: FormFieldType = {
       id,
       label: `Field ${fields.length + 1}`,
       type,

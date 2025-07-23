@@ -11,7 +11,7 @@ const ConfigPanel: React.FC<Props> = ({ field, updateField, steps }) => {
   if (!field)
     return <div className="text-muted">Select a field to configure</div>;
 
-  const handleChange = (key: keyof FormFieldTypeType, value: any) => {
+  const handleChange = (key: keyof FormFieldType, value: any) => {
     updateField({ ...field, [key]: value });
   };
 
@@ -29,18 +29,24 @@ const ConfigPanel: React.FC<Props> = ({ field, updateField, steps }) => {
         />
       </div>
 
-      {/* Field ID */}
-      {/* <div className="mb-3">
-        <label className="form-label">Field ID</label>
+      {/* ID */}
+      <div className="mb-3">
+        <label htmlFor="fieldId" className="form-label">
+          Field ID
+        </label>
         <input
-          className="form-control"
+          type="text"
+          id="fieldId"
+          className={`form-control`}
           value={field.id}
           onChange={(e) => handleChange("id", e.target.value)}
+          disabled
         />
+
         <div className="form-text text-muted">
-          Used for data mapping and conditional logic.
+          Unique identifier used in formData
         </div>
-      </div> */}
+      </div>
 
       {/* Placeholder */}
       <div className="mb-3">

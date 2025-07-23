@@ -1,4 +1,5 @@
 import type { FormSchema } from "../types/form-schema.type";
+import { fetchSavedData } from "./form-renderer.service";
 
 // export const fetchFormSchema = async (formName: string, email: string) => {
 //   const res = await axios.post("/api/form/load", { formName, email });
@@ -17,11 +18,16 @@ export const fetchFormSchema = async (formName: string, email: string) => {
   }
 
   const schema = await res.json();
+  const result = fetchSavedData(formName, email) ?? {
+    data: {},
+    step: 0,
+    savedAt: new Date().toISOString(),
+  };
 
   return {
     schema,
-    savedData: {},
-    lastStep: 0,
+    savedData: result?.data || {},
+    lastStep: result?.step,
   };
 };
 

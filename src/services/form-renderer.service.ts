@@ -25,7 +25,7 @@ export const saveStepData = async (
   data: Record<string, any>,
   step: number
 ) => {
-  const key = `${formName}_${email}_progress`;
+  const key = `form_${formName}_${email}_progress`;
 
   const payload = {
     data,
@@ -34,4 +34,30 @@ export const saveStepData = async (
   };
 
   localStorage.setItem(key, JSON.stringify(payload));
+};
+
+export const fetchSavedData = (
+  formName: string,
+  email: string
+): {
+  data: Record<string, any>;
+  step: number;
+  savedAt: string;
+} | null => {
+  const key = `form_${formName}_${email}_progress`;
+  const raw = localStorage.getItem(key);
+
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      data: parsed.data || {},
+      step: parsed.step || 0,
+      savedAt: parsed.savedAt || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.warn("Failed to parse saved form data:", error);
+    return null;
+  }
 };
