@@ -1,35 +1,33 @@
 import React from "react";
-import axios from "axios";
 import type { FormFieldType } from "../../../types/form-schema.type";
+import { uploadDocument } from "../../../services/form-renderer.service";
 
 interface Props {
   field: FormFieldType;
-  value: string; // assume API returns a URL or ID
+  value: string;
   onChange: (val: string) => void;
 }
 
 const FileUpload: React.FC<Props> = ({ field, value, onChange }) => {
+  const [error, setError] = React.useState<boolean>(false);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      //   const res = await axios.post("/api/upload", formData);
-      //   onChange(res.data);
-
-      const response = {
-        fileName: file.name,
-        fileSize: file.size,
-        fileLoc: `/uploads/${file.name}`, // simulate path
-      };
-
-      onChange(response);
+      const response: any = await uploadDocument(file);
+      const { fileName, fileLoc } = response;
+      onChange({ fileLoc, fileName } as any);
+      setError(false);
     } catch (err) {
-      console.error("Upload failed", err);
-      alert("Upload error");
+      console.log("Upload failed:", err);
+      setError(true);
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+      onChange({} as any);
     }
   };
 
@@ -39,13 +37,18 @@ const FileUpload: React.FC<Props> = ({ field, value, onChange }) => {
         {field.label}
       </label>
       <input
+        ref={inputRef}
         type="file"
         id={field.id}
         className="form-control"
         required={field.required}
         onChange={handleUpload}
       />
-      {value && <small className="text-success d-block mt-1">✔ Uploaded</small>}
+      {error ? (
+        <small className="text-danger d-block mt-1">Upload Failed</small>
+      ) : (
+        value && <small className="text-success d-block mt-1">✔ Uploaded</small>
+      )}
     </div>
   );
 };

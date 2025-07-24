@@ -1,32 +1,66 @@
 import React, { useState } from "react";
 import FormStepper from "./FormStepper";
 import EmailPrompt from "../../components/renderer/EmailPrompt";
-import { saveStepData } from "../../services/form-renderer.service";
-import { useSearchParams } from "react-router-dom";
+import {
+  fetchSavedData,
+  saveStepData,
+} from "../../services/form-renderer.service";
 import type { FormSchema } from "../../types/form-schema.type";
 import { fetchFormSchema } from "../../services/form-schema.service";
 
-const FormRenderer: React.FC = () => {
+interface Props {
+  formId: string;
+}
+
+const FormRenderer: React.FC<Props> = ({ formId }) => {
   const [email, setEmail] = useState("");
-  const [params] = useSearchParams();
-  const formName = params.get("formName") || "accountCreation";
+
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null);
+  const [formName, setFormName] = useState<string>("");
+
   const [stepIndex, setStepIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
 
   const loadForm = async (userEmail: string) => {
     setLoading(true);
-    const data = await fetchFormSchema(formName, userEmail);
-    setFormSchema(data.schema);
-    setFormData(data.savedData || {});
-    setStepIndex(data.lastStep || 0);
     setEmail(userEmail);
-    setLoading(false);
+    await fetchFormSchema(formId)
+      .then(async (data: any) => {
+        setFormSchema(data.schema);
+        setFormName(data.schema.title);
+        await fetchSavedData(formId, userEmail)
+          .then((res) => {
+            setFormData(res.data || {});
+            setStepIndex(res.step || 0);
+          })
+          .catch((error) => {
+            console.error("Failed to fetch saved data:", error.message);
+          });
+      })
+      .catch((error: any) => {
+        console.log("Failed to load form:", error.message);
+        alert(`Failed to load form: ${error.message}`);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleNext = async () => {
-    await saveStepData(formName, email, formData, stepIndex);
+    const result = await saveStepData(
+      formName,
+      formId,
+      email,
+      formData,
+      stepIndex
+    );
+
+    if (!result.success) {
+      console.warn("Step save failed:", result.error);
+      alert(`Could not save progress: ${result.error}`);
+      return;
+    }
 
     const isLastStep = stepIndex >= (formSchema?.steps.length || 1) - 1;
 
@@ -37,13 +71,15 @@ const FormRenderer: React.FC = () => {
 
       const event = new CustomEvent("formSubmission", {
         detail: {
-          formName,
+          formId,
           email,
           formData,
           completedAt: new Date().toISOString(),
         },
       });
+
       window.dispatchEvent(event);
+      alert("Form completed successfully!");
     }
   };
 

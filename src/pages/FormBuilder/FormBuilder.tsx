@@ -8,7 +8,7 @@ import { saveFormSchema } from "../../services/form-schema.service";
 import SchemaViewer from "../../components/builder/SchemaViewer";
 
 const FormBuilder: React.FC = () => {
-  const [formTitle, setFormTitle] = useState("Account Creation");
+  const [formTitle, setFormTitle] = useState("Untitled");
   const [schema, setSchema] = useState<FormSchema>({
     title: formTitle,
     steps: [{ title: "Step 1", fields: [] }],
@@ -63,18 +63,29 @@ const FormBuilder: React.FC = () => {
   };
 
   const handleSave = async (schema: FormSchema) => {
-    const formId = `form_${Date.now()}`;
+    const formId = formTitle.toLowerCase().replace(/\s+/g, "_");
     const exportSchema = {
       ...schema,
       title: formTitle,
     };
 
     try {
-      await saveFormSchema(formId, formTitle, exportSchema);
-      alert("✅ Schema saved successfully!");
+      const result = await saveFormSchema(formId, exportSchema);
+
+      if (result.success && result.status === 200) {
+        alert(result.message || "Schema saved successfully!");
+        console.log("Schema saved for:", formId);
+      } else {
+        const errorMsg =
+          result.error || `Save failed with status ${result.status}`;
+        console.warn("Save operation failed:", errorMsg);
+        alert(`Save failed: ${errorMsg}`);
+      }
     } catch (err: any) {
-      console.error("❌ Save error:", err.message);
-      alert("Failed to save schema");
+      const fallbackMessage =
+        err?.message || "Unexpected error occurred during save";
+      console.error("Unhandled exception:", err);
+      alert(`Save failed: ${fallbackMessage}`);
     }
   };
 
@@ -83,7 +94,7 @@ const FormBuilder: React.FC = () => {
       <h2 className="mb-4">🛠️ Form Builder</h2>
 
       {/* Form title input */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <label className="form-label">Form Title</label>
         <input
           className="form-control"
@@ -93,7 +104,31 @@ const FormBuilder: React.FC = () => {
             setSchema({ ...schema, title: e.target.value });
           }}
         />
+         <button className="btn btn-success" onClick={handleExport}>
+        Save Schema
+      </button>
+      </div> */}
+
+      <div className="mb-4 p-3 border rounded bg-light">
+        <label htmlFor="formTitle" className="form-label fw-bold text-primary">
+          Form Title
+        </label>
+        <div className="d-flex gap-2">
+          <input
+            id="formTitle"
+            className="form-control"
+            value={formTitle}
+            onChange={(e) => {
+              setFormTitle(e.target.value);
+              setSchema({ ...schema, title: e.target.value });
+            }}
+          />
+          <button className="btn btn-success" onClick={handleExport}>
+            💾 Save
+          </button>
+        </div>
       </div>
+
       {showJSON && (
         <SchemaViewer
           schema={schema}
@@ -131,10 +166,6 @@ const FormBuilder: React.FC = () => {
           />
         </div>
       </div>
-
-      <button className="btn btn-success mt-4" onClick={handleExport}>
-        Save Schema
-      </button>
     </div>
   );
 };

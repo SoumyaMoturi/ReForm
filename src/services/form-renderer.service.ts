@@ -1,63 +1,108 @@
-import axios from "axios";
-import type { FormSchema } from "../types/form-schema.type";
+import { axiosInstance } from "./axiosInstance";
+import { v4 as uuidv4 } from "uuid";
 
-// export const fetchFormSchema = async (formName: string, email: string) => {
-//   const res = await axios.post("/api/form/load", { formName, email });
-//   return res.data as {
-//     schema: FormSchema;
-//     savedData: Record<string, any>;
-//     lastStep: number;
-//   };
-// };
-
-// export const saveStepData = async (
-//   formName: string,
-//   email: string,
-//   data: Record<string, any>,
-//   step: number
-// ) => {
-//   await axios.post("/api/form/save", { formName, email, data, step });
-// };
+export type SaveStepResult = {
+  success: boolean;
+  status: number;
+  message?: string;
+  error?: string;
+};
 
 export const saveStepData = async (
   formName: string,
+  formId: string,
   email: string,
   data: Record<string, any>,
   step: number
-) => {
-  const key = `form_${formName}_${email}_progress`;
-
-  const payload = {
-    data,
-    step,
-    savedAt: new Date().toISOString(),
+): Promise<SaveStepResult> => {
+  const apiPayload = {
+    formName,
+    formId,
+    email,
+    stepId: `step_${step}`,
+    formData: data,
   };
 
-  localStorage.setItem(key, JSON.stringify(payload));
+  try {
+    const response = await axiosInstance.put(
+      `/progress/${email}/${formId}`,
+      apiPayload
+    );
+
+    return {
+      success: true,
+      status: response.status,
+      message: "Progress saved successfully",
+    };
+  } catch (error: any) {
+    console.error("Failed to save progress:", error.message);
+
+    return {
+      success: false,
+      status: error?.response?.status || 500,
+      error:
+        error?.response?.data?.message ||
+        error.message ||
+        "Progress save failed",
+    };
+  }
 };
 
-export const fetchSavedData = (
-  formName: string,
+export const fetchSavedData = async (
+  formId: string,
   email: string
-): {
-  data: Record<string, any>;
-  step: number;
-  savedAt: string;
-} | null => {
-  const key = `form_${formName}_${email}_progress`;
-  const raw = localStorage.getItem(key);
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.get(`/progress/${email}/${formId}`);
 
-  if (!raw) return null;
+    const serverData = response.data;
+
+    return {
+      data: serverData.formData || {},
+      step: parseInt(serverData.step?.split("_")?.[1] || "0", 10),
+      savedAt: serverData.savedAt || new Date().toISOString(),
+    };
+  } catch (error: any) {
+    console.error("Failed to fetch progress:", error.message);
+
+    return {
+      data: {},
+      step: 0,
+      savedAt: new Date().toISOString(),
+    };
+  }
+};
+
+export type UploadResponse = {
+  fileName: string;
+  fileLoc: string;
+  status: number;
+};
+
+export const uploadDocument = async (file: File): Promise<UploadResponse> => {
+  const formData = new FormData();
+  const fileId = uuidv4();
+  formData.append("file", file);
+  formData.append("fileName", file.name);
 
   try {
-    const parsed = JSON.parse(raw);
+    const response = await axiosInstance.post(
+      `/progress/document/${fileId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
     return {
-      data: parsed.data || {},
-      step: parsed.step || 0,
-      savedAt: parsed.savedAt || new Date().toISOString(),
+      fileName: response.data.fileName,
+      fileLoc: response.data?.fileLoc,
+      status: response.status,
     };
-  } catch (error) {
-    console.warn("Failed to parse saved form data:", error);
-    return null;
+  } catch (error: any) {
+    console.error("Document upload failed:", error.message);
+    throw new Error(error?.response?.data?.message || "Upload failed");
   }
 };
