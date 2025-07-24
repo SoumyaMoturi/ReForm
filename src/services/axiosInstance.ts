@@ -8,7 +8,8 @@ export type ApiResponse<T> = {
 };
 
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:9143/api/v1/acceleratedonboarding",
+  baseURL:
+    "https://springboot-app-1069861645989.asia-south1.run.app/api/v1/acceleratedonboarding",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
