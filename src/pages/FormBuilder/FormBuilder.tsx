@@ -93,34 +93,20 @@ const FormBuilder: React.FC = () => {
     <div className="container-fluid mt-4">
       <h2 className="mb-4">🛠️ Form Builder</h2>
 
-      {/* Form title input */}
-      {/* <div className="mb-3">
-        <label className="form-label">Form Title</label>
-        <input
-          className="form-control"
-          value={formTitle}
-          onChange={(e) => {
-            setFormTitle(e.target.value);
-            setSchema({ ...schema, title: e.target.value });
-          }}
-        />
-         <button className="btn btn-success" onClick={handleExport}>
-        Save Schema
-      </button>
-      </div> */}
-
       <div className="mb-4 p-3 border rounded bg-light">
         <label htmlFor="formTitle" className="form-label fw-bold text-primary">
           Form Title
         </label>
-        <div className="d-flex gap-2">
+
+        <div className="d-flex align-items-start">
           <input
             id="formTitle"
-            className="form-control"
+            className="form-control me-3"
+            style={{ height: "60px", fontSize: "1.25rem" }}
             value={formTitle}
             onChange={(e) => {
               setFormTitle(e.target.value);
-              setSchema({ ...schema, title: e.target.value });
+              setSchema((prev) => ({ ...prev, title: e.target.value }));
             }}
           />
           <button className="btn btn-success" onClick={handleExport}>
