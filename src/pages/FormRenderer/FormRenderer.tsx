@@ -48,12 +48,15 @@ const FormRenderer: React.FC<Props> = ({ formId }) => {
   };
 
   const handleNext = async () => {
+    const isLastStep = stepIndex >= (formSchema?.steps.length || 1) - 1;
+
     const result = await saveStepData(
       formName,
       formId,
       email,
       formData,
-      stepIndex
+      stepIndex,
+      isLastStep ? "COMPLETED" : "INPROGRESS"
     );
 
     if (!result.success) {
@@ -61,8 +64,6 @@ const FormRenderer: React.FC<Props> = ({ formId }) => {
       alert(`Could not save progress: ${result.error}`);
       return;
     }
-
-    const isLastStep = stepIndex >= (formSchema?.steps.length || 1) - 1;
 
     if (!isLastStep) {
       setStepIndex(stepIndex + 1);

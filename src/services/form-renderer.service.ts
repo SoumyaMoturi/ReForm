@@ -13,14 +13,16 @@ export const saveStepData = async (
   formId: string,
   email: string,
   data: Record<string, any>,
-  step: number
+  step: number,
+  status: string
 ): Promise<SaveStepResult> => {
   const apiPayload = {
     formName,
     formId,
     email,
-    stepId: `step_${step}`,
+    step,
     formData: data,
+    status,
   };
 
   try {
