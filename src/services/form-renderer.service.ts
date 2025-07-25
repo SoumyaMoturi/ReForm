@@ -61,7 +61,7 @@ export const fetchSavedData = async (
 
     return {
       data: serverData.formData || {},
-      step: parseInt(serverData.step?.split("_")?.[1] || "0", 10),
+      step: parseInt(serverData.step, 10),
       savedAt: serverData.savedAt || new Date().toISOString(),
     };
   } catch (error: any) {
